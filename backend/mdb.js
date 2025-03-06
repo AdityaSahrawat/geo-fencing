@@ -12,18 +12,27 @@ const studentSchema = new mongoose.Schema({
 });
 
 const attendanceSchema = new mongoose.Schema({
-  roomNo:          { type: mongoose.Schema.Types.ObjectId, ref: "Room", required: true },
-  branch: { type: String, required: true },
-  admissionYear: { type: String, required: true },
-  teacherId:       { type: mongoose.Schema.Types.ObjectId, ref: "Teacher", required: true },
-  timestamp:       { type: Date, default: Date.now },
-  students: [
+  roomNo: { type: String, required: true },
+  teacherId: { type: mongoose.Schema.Types.ObjectId, ref: "Teacher", required: true },
+  date: { type: String, required: true },
+  sessions: [
     {
-      studentId:   { type: mongoose.Schema.Types.ObjectId, ref: "Student" },
-      status:      { type: String, enum: ["Present", "Absent"], default: "Absent" },
-    },
-  ],
-});
+      startTime: { type: Date, required: true },
+      type: { type: String, enum: ["tutorial", "class", "lab"], required: true }, // New field
+      students: [
+        {
+          studentId: { type: mongoose.Schema.Types.ObjectId, ref: "Student" },
+          presentCount: { type: Number, default: 0 },
+          absentCount: { type: Number, default: 0 },
+          finalStatus: { type: String, enum: ["Present", "Absent"], default: "Absent" } // New field
+        }
+      ]
+    }
+  ]
+}, { timestamps: true });
+
+
+
 
 const teacherSchema = new mongoose.Schema({
   email:      { type: String, required: true, unique: true },

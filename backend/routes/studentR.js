@@ -2,20 +2,10 @@ const express = require("express")
 const {studentModel} = require("../mdb")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const { authenticate } = require("../middleware/auth")
 
 const studentR = express.Router()
-
-studentR.get("/", async (req, res) => {
-  const { branch, admissionYear } = req.query
-
-  try {
-    const students = await studentModel.find({ branch, admissionYear })
-    res.status(200).json({ students })
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching students", error })
-  }
-})
-
+ 
 studentR.post('/login', async (req, res) => {
   const { email, password, role } = req.body
 
@@ -27,7 +17,9 @@ studentR.post('/login', async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, student.password)
     if (!isMatch) {
+      consile.log("in match")
       return res.status(400).json({ message: "Invalid credentials." })
+      
     }
     
     const token = jwt.sign({ id: student._id, role }, process.env.JWT_SECRET)
@@ -64,5 +56,7 @@ studentR.post('/register', async (req, res) => {
     res.status(500).json({ message: "Error registering user.", error })
   }
 })
+
+
 
 module.exports = { studentR }

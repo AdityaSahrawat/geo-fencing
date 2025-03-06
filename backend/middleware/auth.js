@@ -16,12 +16,4 @@ const authenticate = (req, res, next) => {
   }
 };
 
-// // Authorize based on role
-// const authorize = (role) => (req, res, next) => {
-//   if (req.user.role !== role) {
-//     return res.status(403).json({ message: "Access denied. Unauthorized role." });
-//   }
-//   next();
-// };
-
 module.exports = { authenticate };

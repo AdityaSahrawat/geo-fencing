@@ -30,7 +30,7 @@ const {notifR} = require("./routes/notificationR.js")
 const {attendanceR} = require("./routes/attendance.js")
 const {teacherR} = require("./routes/teacherR.js")
 
-app.use("/api/students", studentR)
+app.use("/api/student", studentR)
 app.use("/api/notify", notifR)
 app.use("/api/attendance", attendanceR) 
 app.use("/api/teacher", teacherR)

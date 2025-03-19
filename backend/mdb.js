@@ -1,6 +1,4 @@
 const mongoose = require("mongoose")
-const Schema = mongoose.Schema
-const objectId = mongoose.Types.ObjectId;
 
 const studentSchema = new mongoose.Schema({
   email:          { type: String, required: true, unique: true },
@@ -9,6 +7,7 @@ const studentSchema = new mongoose.Schema({
   rollNo:         { type: String, required: true },
   branch:         { type: String, required: true },
   admissionYear:  { type: String, required: true },
+  isVerified : {type : Boolean , default : false , required : true}
 });
 
 const attendanceSchema = new mongoose.Schema({
@@ -18,7 +17,8 @@ const attendanceSchema = new mongoose.Schema({
   sessions: [
     {
       startTime: { type: Date, required: true },
-      type: { type: String, enum: ["tutorial", "class", "lab"], required: true }, // New field
+      branch : {type : String , required: true} ,
+      type: { type: String, enum: ["tutorial", "class", "lab"], required: true }, 
       students: [
         {
           studentId: { type: mongoose.Schema.Types.ObjectId, ref: "Student" },
@@ -30,6 +30,12 @@ const attendanceSchema = new mongoose.Schema({
     }
   ]
 }, { timestamps: true });
+
+const verifiedEmailSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  expiresAt: { type : Date },
+  code : {type : String}
+});
 
 
 
@@ -61,12 +67,13 @@ const roomSchema = new mongoose.Schema({
 const teacherModel = mongoose.model('teacherSchema', teacherSchema);
 const studentModel = mongoose.model('studentSchema', studentSchema);
 const attendanceModel = mongoose.model('attendanceSchema', attendanceSchema);
-const roomModel = mongoose.model("roomSchema" ,roomSchema)
-
+const roomModel = mongoose.model("roomSchema" ,roomSchema);
+const verifiedEmailModel = mongoose.model("verificationSchema" , verifiedEmailSchema);
 
 module.exports = {
   teacherModel,
     studentModel,
     attendanceModel,
-    roomModel
+    roomModel,
+    verifiedEmailModel
 }

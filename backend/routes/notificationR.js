@@ -14,7 +14,6 @@ notifR.post("/", async (req, res) => {
     const { roomNo, message } = req.body;
   
     try {
-      // Here, you can integrate with a real-time notification service (e.g., WebSocket, Firebase)
       console.log(`Notification for Room ${roomNo}: ${message}`);
       res.status(200).json({ message: "Notification sent successfully" });
     } catch (error) {

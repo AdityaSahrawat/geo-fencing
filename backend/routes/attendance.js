@@ -1,7 +1,8 @@
 const express = require("express");
-const { attendanceModel, roomModel, studentModel } = require("../mdb");
+const { attendanceModel, roomModel, studentModel, teacherModel } = require("../mdb");
 const { authenticate } = require("../middleware/auth");
 const { isPointInPolygon } = require("geolib");
+const { DateTime } = require("luxon");
  // active
 const attendanceR = express.Router();
 
@@ -14,30 +15,35 @@ attendanceR.post("/start", authenticate, async (req, res) => {
   try {
     const { roomNo, branch, admissionYear, type } = req.body;
     const teacherId = req.user.id;
-    const today = new Date().toISOString().split("T")[0];
+    const todayIST = DateTime.now().setZone("Asia/Kolkata").toFormat("yyyy-MM-dd HH:mm:ss");
+    console.log(todayIST);
+    // const formattedDate = today.toISOString().split("T")[0];
 
     const room = await roomModel.findOne({ roomNo });
     if (!room) return res.status(404).json({ message: "Room not found." });
-
+    const teacher = await teacherModel.findById(teacherId)
+    if(!teacher){
+      res.status(404).json
+    }
     const students = await studentModel.find({ branch, admissionYear });
     if (!students.length) return res.status(404).json({ message: "No students found." });
-
     const newSession = {
-      startTime: new Date(),
+      startTime: DateTime.now().setZone("Asia/Kolkata").toFormat("yyyy-MM-dd HH:mm:ss"),
       type,
+      branch,
       students: students.map(student => ({
         studentId: student._id,
-        email: student.email, // Include email for easy reference
+        email: student.email,
         presentCount: 0,
         absentCount: 0,
-        finalStatus: "Absent", // Initialize status as "Pending"
+        finalStatus: "Absent",
       })),
       roomNo,
       roomCoordinates: room.coordinates,
       responses: new Map(),
     };
 
-    let attendance = await attendanceModel.findOne({ teacherId, roomNo, date: today });
+    let attendance = await attendanceModel.findOne({ teacherId, roomNo, date: todayIST.split(" ")[0] });
     if (attendance) {
       attendance.sessions.push(newSession);
       await attendance.save();
@@ -45,7 +51,7 @@ attendanceR.post("/start", authenticate, async (req, res) => {
       attendance = new attendanceModel({
         roomNo,
         teacherId,
-        date: today,
+        date: todayIST.split(" ")[0],
         sessions: [newSession],
       });
       await attendance.save();
@@ -58,9 +64,14 @@ attendanceR.post("/start", authenticate, async (req, res) => {
       roomNo,
       students: students.map(s => s.email),
       roomCoordinates: room.coordinates,
+      teacher: {
+        id: teacherId,
+        name: teacher.name,
+        email: teacher.email
+      }
     });
 
-    res.status(200).json({ message: "New attendance session started.", students: newSession.students });
+    res.status(200).json({ message: "New attendance session started.", students: newSession.students});
   } catch (error) {
     console.error("❌ Error starting attendance:", error);
     res.status(500).json({ message: "Error starting attendance.", error: error.message });
@@ -130,17 +141,8 @@ attendanceR.post("/send-coordinates", authenticate, async (req, res) => {
     await attendance.save();
 
     session.responses.set(studentId, { status, email: student.email });
-
-    console.log("Emitting attendanceUpdate with data in /send coords:", {
-      roomNo,
-      students: session.students.map(student => ({
-        studentId: student.studentId,
-        email: student.email,
-        status: student.finalStatus,
-      }))
-    })
     req.io.emit("attendanceUpdate", {
-      roomNo,
+      roomNo, 
       students: session.students.map(student => ({
         studentId: student.studentId,
         email: student.email,
@@ -158,11 +160,11 @@ attendanceR.post("/send-coordinates", authenticate, async (req, res) => {
 attendanceR.post("/take", authenticate, async (req, res) => {
   const { roomNo } = req.body;
   const teacherId = req.user.id;
-  const today = new Date().toISOString().split("T")[0];
+  const todayIST = DateTime.now().setZone("Asia/Kolkata").toFormat("yyyy-MM-dd");
   console.log("req came at /take")
   try {
     // Find the attendance record for the session
-    let attendance = await attendanceModel.findOne({ teacherId, roomNo, date: today });
+    let attendance = await attendanceModel.findOne({ teacherId, roomNo, date: todayIST });
     if (!attendance) return res.status(400).json({ message: "No active session found." });
 
     // Get the latest session
@@ -189,30 +191,25 @@ attendanceR.post("/take", authenticate, async (req, res) => {
         student.absentCount += 1; // Increase absent count
         global.responseTracker.set(studentId, { status: "Absent", email: studentEmail });
 
-        console.log(`✅ Marked student ${studentEmailMap.get(student.studentId.toString())} as absent.`);
       }
     }
 
     await attendance.save();
-
-
-    console.log("📢 Emitting 'attendanceUpdate' with Pending statuses...");
+    
     req.io.emit("attendanceUpdate", {
       roomNo,
       students: latestSession.students.map(student => ({
         studentId: student.studentId.toString(),
         email: studentEmailMap.get(student.studentId.toString()) || "unknown@example.com",
-        status: "Pending" // UI only, doesn't affect database
+        status: "Pending" 
       }))
     });
     global.responseTracker.clear();
 
-    console.log("📢 Emitting 'requestCoordinates' event...");
     req.io.emit("requestCoordinates", {
       roomNo,
       students: latestSession.students.map(student => studentEmailMap.get(student.studentId.toString()))
     });
-
     res.status(200).json({ message: "Attendance updated successfully.", attendance: latestSession });
 
   } catch (error) {
@@ -225,13 +222,22 @@ attendanceR.post("/take", authenticate, async (req, res) => {
 attendanceR.post("/stop", authenticate, async (req, res) => {
   const { roomNo } = req.body;
   const teacherId = req.user.id;
-  const today = new Date().toISOString().split("T")[0];
+  console.log("req cam at /stop")
 
   try {
-    const attendance = await attendanceModel.findOne({ teacherId, roomNo, date: today });
+    const attendance = await attendanceModel
+      .findOne({ teacherId, roomNo })
+      .populate({
+        path: "sessions.students.studentId",
+        model: "studentSchema", // Ensure correct model reference
+        select: "email"
+      });
     if (!attendance) return res.status(404).json({ message: "No records found." });
-
     const latestSession = attendance.sessions[attendance.sessions.length - 1];
+
+    const startTimeIST = DateTime.fromJSDate(latestSession.startTime)
+    .setZone("Asia/Kolkata")
+    .toFormat("yyyy-MM-dd HH:mm:ss");
 
     // Calculate finalStatus for each student
     latestSession.students.forEach(student => {
@@ -239,15 +245,20 @@ attendanceR.post("/stop", authenticate, async (req, res) => {
     });
 
     await attendance.save();
+    const teacher = await teacherModel.findById(teacherId)
 
     req.io.emit("finalAttendance", {
       roomNo,
       students: latestSession.students.map(student => ({
         email: student.email,
         finalStatus: student.finalStatus
-      }))
+      })),
+      teacher : {
+        name : teacher.name,
+        email : teacher.email
+      }
     });
-    res.status(200).json({ message: "Final attendance saved.", attendance });
+    res.status(200).json({ message: "Final attendance saved.", attendance , startTimeIST });
 
     ongoingAttendanceSessions.delete(teacherId);
 
@@ -258,18 +269,20 @@ attendanceR.post("/stop", authenticate, async (req, res) => {
 
 // filter history
 attendanceR.get("/history", authenticate, async (req, res) => {
-  const { teacherId, roomNo, date, branch, admissionYear, type } = req.query;
+  const  teacherId = req.user.id
   console.log("req came at history")
   try {
-    let filter = {};
-    if (teacherId) filter.teacherId = teacherId;
-    if (roomNo) filter.roomNo = roomNo;
-    if (date) filter.date = date;
-    if (branch) filter.branch = branch;
-    if (admissionYear) filter.admissionYear = admissionYear;
-    if (type) filter["sessions.type"] = type;
 
-    const attendanceHistory = await attendanceModel.find(filter).sort({ date: -1 });
+    // const attendanceHistory = await attendanceModel.find(filter).sort({ date: -1 });
+
+    const attendanceHistory = await attendanceModel
+    .find({ teacherId })
+      .sort({ date: -1 })
+      .populate({
+        path: "sessions.students.studentId",
+        model: "studentSchema", // Use correct model name
+        select: "email"
+      });
 
     if (!attendanceHistory.length) {
       return res.status(404).json({ message: "No attendance records found." });
@@ -281,7 +294,6 @@ attendanceR.get("/history", authenticate, async (req, res) => {
   }
 });
 
-// Cancel class and mark all students as present
 attendanceR.post("/cancel", authenticate, async (req, res) => {
   const { branch, admissionYear, type } = req.body;
   const teacherId = req.user.id;
@@ -355,42 +367,54 @@ attendanceR.post("/update-status", authenticate, async (req, res) => {
   }
 });
 
-attendanceR.post("/check" , async(req , res)=>{
-  const { roomNo, latitude, longitude } = req.body;
-  console.log("req 1")
+attendanceR.get("/student-history", authenticate, async (req, res) => {
   try {
+    const studentId = req.user.id;
+    console.log("req at student-history")
+    const attendanceRecords = await attendanceModel
+      .find({ "sessions.students.studentId": studentId })
+      .populate({
+        path: "teacherId",
+        model: "teacherSchema", // Ensure correct model name
+        select: "name email"
+      });
 
-    const room = await roomModel.findOne({ roomNo });
-    console.log(room)
-    if (!room) return res.status(404).json({ message: "Room not found." });
-
-    const studentLat = Number(latitude), studentLon = Number(longitude);
-    if (isNaN(studentLat) || isNaN(studentLon)) {
-      return res.status(400).json({ message: "Invalid coordinates." });
+    if (!attendanceRecords.length) {
+      return res.status(404).json({ message: "No attendance history found." });
     }
-    
-    const polygonPoints = room.coordinates.map(coord => ({
-      latitude: Number(coord.latitude),
-      longitude: Number(coord.longitude)
-    }));
-    polygonPoints.push(polygonPoints[0]); 
-    console.log("Student Coordinates:", { latitude: studentLat, longitude: studentLon });
-    console.log("Room Polygon Coordinates:", polygonPoints);
 
-    const isInside = isPointInPolygon({ latitude: latitude, longitude: longitude }, polygonPoints);
-    console.log("Is Inside?", isInside);
+    // Format the response
+    const formattedHistory = attendanceRecords.flatMap((record) =>
+      record.sessions
+        .filter((s) => s.students.some((stu) => stu.studentId.toString() === studentId))
+        .map((session) => {
+          const studentRecord = session.students.find(
+            (s) => s.studentId.toString() === studentId
+          );
 
-    const status = isInside ? "Present" : "Absent";
+          return {
+            date: record.date,
+            roomNo: record.roomNo,
+            teacher: {
+              name: record.teacherId?.name || "Unknown",
+              email: record.teacherId?.email || "Unknown",
+            },
+            sessionType: session.type,
+            status: studentRecord?.finalStatus || "Unknown",
+            presentCount: studentRecord?.presentCount || 0,
+            absentCount: studentRecord?.absentCount || 0,
+          };
+        })
+    );
 
-    res.json({
-      status : status
-    })
-  }catch(e){
-    res.json({
-      message : "error is getting status"
-    })
+    res.status(200).json({ attendanceHistory: formattedHistory });
+  } catch (error) {
+    console.error("❌ Error fetching student attendance history:", error);
+    res.status(500).json({ message: "Error fetching attendance history." });
   }
-})
+});
+
+
 
 
 module.exports = { attendanceR };

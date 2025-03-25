@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import axios from "axios";
 import io from "socket.io-client";
 
-const socket = io("http://localhost:5000"); // Backend URL
+const socket = io("http://34.60.77.234:5000"); // Backend URL
 
 const Student = () => {
   // Listen for attendance requests

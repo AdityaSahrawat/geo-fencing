@@ -375,7 +375,7 @@ attendanceR.get("/student-history", authenticate, async (req, res) => {
       .find({ "sessions.students.studentId": studentId })
       .populate({
         path: "teacherId",
-        model: "teacherSchema", // Ensure correct model name
+        model: "teacherSchema", 
         select: "name email"
       });
 

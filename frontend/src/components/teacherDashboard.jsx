@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
-const socket = io('http://10.0.10.5:5000');
+const socket = io('http://34.60.77.234:5000');
 
 function TeacherDashboard() {
   const [roomNo, setRoomNo] = useState('');
@@ -70,7 +70,7 @@ function TeacherDashboard() {
     setAttendanceResults([]); // Clear previous results
 
     try {
-      await axios.post('http://10.0.10.5:5000/api/attendance/start', 
+      await axios.post('http://34.60.77.234:5000/api/attendance/start', 
         { roomNo, branch, admissionYear },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );

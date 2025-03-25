@@ -61,30 +61,32 @@ studentR.post("/verify-email", async (req, res) => {
 
 studentR.post("/send-verification", async (req, res) => {
   const { email } = req.body;
-
-  const parsedData = parseEmail(email);
+  console.log(email)
+  console.log("1")
+  const parsedData = parseEmail(email)
   if (!parsedData) return res.status(400).json({ message: "Invalid email format" });
-
+  console.log("2")
   const existingUser = await studentModel.findOne({ email });
+  console.log("ex : " , existingUser)
   if (existingUser) return res.status(400).json({ message: "Email already registered" });
 
   const verificationCode = crypto.randomInt(100000, 999999);
   await verifiedEmailModel.findOneAndUpdate(
-    { email }, // Find email in DB
+    { email }, 
     {
       code: verificationCode,
       expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes expiry
     },
-    { upsert: true, new: true } // If not found, create new
+    { upsert: true, new: true } 
   );
-
+  console.log("3")
   const mailOptions = {
     from: "geoattendanceiiitdwd@gmail.com",
     to: email,
     subject: "Verify Your Email",
     text: `Your verification code is ${verificationCode}. This code expires in 10 minutes.`,
   };
-
+  console.log("4")
   transporter.sendMail(mailOptions, (err) => {
     if (err) return res.status(500).json({ message: "Failed to send email" });
     res.status(200).json({ message: "Verification code sent to email" });

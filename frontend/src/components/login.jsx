@@ -29,7 +29,7 @@ function Login() {
         : { email, password, role, name };
 
       const response = await axios.post(
-        `http://10.0.10.5:5000/api/${role}/${endpoint}`,
+        `http://34.60.77.234:5000/api/${role}/${endpoint}`,
         data
       );
 

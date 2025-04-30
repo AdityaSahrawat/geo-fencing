@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "com.pravera.flutter_foreground_task-merged_res-3:/layout-v21/notification_action_tombstone.xml",
+        "source": "com.pravera.flutter_foreground_task-core-1.13.1-13:/layout-v21/notification_action_tombstone.xml"
+    },
+    {
+        "merged": "com.pravera.flutter_foreground_task-merged_res-3:/layout-v21/notification_action.xml",
+        "source": "com.pravera.flutter_foreground_task-core-1.13.1-13:/layout-v21/notification_action.xml"
+    },
+    {
+        "merged": "com.pravera.flutter_foreground_task-merged_res-3:/layout-v21/notification_template_icon_group.xml",
+        "source": "com.pravera.flutter_foreground_task-core-1.13.1-13:/layout-v21/notification_template_icon_group.xml"
+    },
+    {
+        "merged": "com.pravera.flutter_foreground_task-merged_res-3:/layout-v21/notification_template_custom_big.xml",
+        "source": "com.pravera.flutter_foreground_task-core-1.13.1-13:/layout-v21/notification_template_custom_big.xml"
+    }
+]

@@ -1,0 +1,30 @@
+[
+    {
+        "merged": "C:\\Users\\atith\\.gradle\\daemon\\8.3\\com.example.geo_attendance.app-merged_res-6:\\mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\atith\\.gradle\\daemon\\8.3\\com.example.geo_attendance.app-main-1:\\mipmap-xxhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\atith\\.gradle\\daemon\\8.3\\com.example.geo_attendance.app-merged_res-6:\\mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\atith\\.gradle\\daemon\\8.3\\com.example.geo_attendance.app-main-1:\\mipmap-xxxhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\atith\\.gradle\\daemon\\8.3\\com.example.geo_attendance.app-merged_res-6:\\drawable-v21_launch_background.xml.flat",
+        "source": "C:\\Users\\atith\\.gradle\\daemon\\8.3\\com.example.geo_attendance.app-main-1:\\drawable-v21\\launch_background.xml"
+    },
+    {
+        "merged": "com.example.geo_attendance.app-merged_res-6:/xml_network_security_config.xml.flat",
+        "source": "com.example.geo_attendance.app-main-1:/xml/network_security_config.xml"
+    },
+    {
+        "merged": "C:\\Users\\atith\\.gradle\\daemon\\8.3\\com.example.geo_attendance.app-merged_res-6:\\mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\atith\\.gradle\\daemon\\8.3\\com.example.geo_attendance.app-main-1:\\mipmap-xhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\atith\\.gradle\\daemon\\8.3\\com.example.geo_attendance.app-merged_res-6:\\mipmap-hdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\atith\\.gradle\\daemon\\8.3\\com.example.geo_attendance.app-main-1:\\mipmap-hdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\atith\\.gradle\\daemon\\8.3\\com.example.geo_attendance.app-merged_res-6:\\mipmap-mdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\atith\\.gradle\\daemon\\8.3\\com.example.geo_attendance.app-main-1:\\mipmap-mdpi\\ic_launcher.png"
+    }
+]

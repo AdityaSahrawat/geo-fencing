@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "com.pravera.flutter_foreground_task-merged_res-3:/drawable/notification_bg_low.xml",
+        "source": "com.pravera.flutter_foreground_task-core-1.13.1-13:/drawable/notification_bg_low.xml"
+    },
+    {
+        "merged": "com.pravera.flutter_foreground_task-merged_res-3:/drawable/notification_bg.xml",
+        "source": "com.pravera.flutter_foreground_task-core-1.13.1-13:/drawable/notification_bg.xml"
+    },
+    {
+        "merged": "com.pravera.flutter_foreground_task-merged_res-3:/drawable/notification_icon_background.xml",
+        "source": "com.pravera.flutter_foreground_task-core-1.13.1-13:/drawable/notification_icon_background.xml"
+    },
+    {
+        "merged": "com.pravera.flutter_foreground_task-merged_res-3:/drawable/notification_tile_bg.xml",
+        "source": "com.pravera.flutter_foreground_task-core-1.13.1-13:/drawable/notification_tile_bg.xml"
+    }
+]

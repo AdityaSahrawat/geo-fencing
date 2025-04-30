@@ -1,0 +1,2 @@
+C:/FlutterProjects/geo_attendance/android/app/.cxx/Debug/6o3o6m2k/x86/CMakeFiles/edit_cache.dir
+C:/FlutterProjects/geo_attendance/android/app/.cxx/Debug/6o3o6m2k/x86/CMakeFiles/rebuild_cache.dir

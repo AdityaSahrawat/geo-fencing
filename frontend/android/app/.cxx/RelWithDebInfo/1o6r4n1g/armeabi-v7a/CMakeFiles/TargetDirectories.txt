@@ -1,0 +1,2 @@
+C:/FlutterProjects/geo_attendance/android/app/.cxx/RelWithDebInfo/1o6r4n1g/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/FlutterProjects/geo_attendance/android/app/.cxx/RelWithDebInfo/1o6r4n1g/armeabi-v7a/CMakeFiles/rebuild_cache.dir
